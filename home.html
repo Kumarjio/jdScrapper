@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>JustDial Scrapper</title>
+	<link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
+	<link rel="stylesheet" href="/static/bootstrap.min.css">
+	<script type="text/javascript" src="/static/jquery.js" ></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<style>
+		#dynamic{
+			padding-top: 100px;
+		}
+		.image, .text{
+			height: 400px;
+			overflow:auto;
+		}
+		.mid{
+			line-height:380px;
+		}
+		#but{
+			height:80px;
+		}
+		#but .btn-group .btn{
+  			border-radius:20px; 
+ 		}
+ 		#url{
+ 			width:300px;
+ 		}
+ 		.warning{
+ 			background-color: yellow;
+ 		}
+ 		.danger{
+ 			background-color: red;
+ 		}
+ 		.success{
+ 			background-color: green;
+ 		}
+ 		.btn-file {
+		    position: relative;
+		    overflow: hidden;
+		}
+		.btn-file input[type=file] {
+		    position: absolute;
+		    top: 0;
+		    right: 0;
+		    min-width: 100%;
+		    min-height: 100%;
+		    font-size: 100px;
+		    text-align: right;
+		    filter: alpha(opacity=0);
+		    opacity: 0;
+		    outline: none;
+		    background: white;
+		    cursor: inherit;
+		    display: block;
+		}
+	</style>
+	<script>
+		var socket = io.connect();
+		$(document).ready(function(){
+			$('#form-one').submit(function(){
+				$('#dynamic').empty();
+				
+				$('#key, #sub, #loc, #sub-loc').attr('disabled','disabled');
+				
+				socket.emit('search', $('#key').val().replace(' ', '+'), $('#loc').val(), $('#sub-loc').val());
+				
+				return false;
+			});
+			
+			socket.on('err', function(err){
+				$('#key, #sub, #loc, #sub-loc').removeAttr('disabled');
+				$('#dynamic').empty();
+				$('#dynamic').append('<div class="col-md-12 text-center">'+err+'</div>');
+			});	
+			
+			socket.on('status', function(sta){	
+				$('#dynamic').empty();
+				$('#dynamic').append('<div class="col-md-12 text-center">'+sta+'</div>');
+			});
+			
+			socket.on('file', function(msg){
+				$('#key, #sub, #loc, #sub-loc').removeAttr('disabled');
+				$('#dynamic').empty();
+				$('#dynamic').append('<div class="col-md-12 text-center">'+msg+'</div>');
+			});
+		});
+	</script>
+</head>
+<body>
+	<nav class="navbar navbar-default navbar-fixed-top">
+  		<div class="container-fluid">
+    		<div class="col-md-12">
+    			<div class="col-md-12">
+	      			<form class="navbar-form text-center form-inline" role="form" autocomplete="off" id="form-one">
+	        			<div class="form-group">
+	          				<input type="text" id="key" class="form-control" placeholder="Search Keyword">
+	        			</div>
+						<div class="form-group">
+							<input type="text" id="loc" class="form-control" placeholder="Location">
+	        			</div>
+	        			<div class="form-group">
+							<input type="text" id="sub-loc" class="form-control" placeholder="Sub Location">
+	        			</div>
+	        			<button type="submit" id="sub" class="btn btn-primary">FETCH DATA</button>
+	      			</form>
+	      		</div>
+    		</div>
+  		</div>
+	</nav>
+	<div class="container">
+		<div class="row form-group" id="dynamic">
+		</div>
+	</div>
+</body>
+</html>
